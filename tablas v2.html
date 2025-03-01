@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Juego de Tablas de Multiplicar</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { transition: background-color 0.5s; }
+        .bounce { animation: bounce 0.5s ease-in-out; }
+        .fade-in { animation: fadeIn 0.5s ease-in-out; }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+    </style>
+</head>
+<body class="bg-blue-200 flex justify-center items-center min-h-screen">
+    <div class="bg-white p-6 rounded-2xl shadow-xl text-center w-96 fade-in">
+        <h1 class="text-3xl font-bold text-blue-600">Tablas de Multiplicar</h1>
+        <p class="mt-2 text-lg">Resuelve la multiplicación:</p>
+        <div id="question" class="text-2xl font-bold my-4 bounce"></div>
+        <p class="text-lg font-semibold">Tiempo restante: <span id="timer" class="text-red-500">10</span>s</p>
+        <input id="answer" type="number" class="border p-2 rounded w-2/3 text-center text-xl" placeholder="Tu respuesta">
+        <button onclick="checkAnswer()" class="mt-4 bg-green-500 text-white px-4 py-2 rounded text-lg hover:bg-green-600">Comprobar</button>
+        <p id="feedback" class="text-lg font-semibold mt-2 fade-in"></p>
+        <p class="mt-4 text-lg">Aciertos: <span id="correct" class="font-bold">0</span> | Errores: <span id="incorrect" class="font-bold">0</span></p>
+        <button onclick="restartGame()" class="mt-4 bg-red-500 text-white px-4 py-2 rounded text-lg hover:bg-red-600">Reiniciar</button>
+    </div>
+    <script>
+        let correct = 0;
+        let incorrect = 0;
+        let num1, num2, correctAnswer;
+        let timer;
+        let timeLeft;
+        let successAudio = new Audio('https://www.fesliyanstudios.com/play-mp3/7635'); // Sonido más agradable de 2s
+        let failAudio = new Audio('https://www.fesliyanstudios.com/play-mp3/4383');
+
+        function generateQuestion() {
+            num1 = Math.floor(Math.random() * 9) + 1;
+            num2 = Math.floor(Math.random() * 9) + 1;
+            correctAnswer = num1 * num2;
+            document.getElementById("question").textContent = `${num1} × ${num2} = ?`;
+            document.getElementById("question").classList.add("bounce");
+            setTimeout(() => document.getElementById("question").classList.remove("bounce"), 500);
+            resetTimer();
+        }
+
+        function resetTimer() {
+            clearInterval(timer);
+            timeLeft = 10;
+            document.getElementById("timer").textContent = timeLeft;
+            timer = setInterval(() => {
+                timeLeft--;
+                document.getElementById("timer").textContent = timeLeft;
+                if (timeLeft === 0) {
+                    clearInterval(timer);
+                    incorrect++;
+                    document.getElementById("incorrect").textContent = incorrect;
+                    showFeedback("¡Tiempo agotado! 😢", "text-red-500");
+                    failAudio.play();
+                    setTimeout(generateQuestion, 1000);
+                }
+            }, 1000);
+        }
+
+        function checkAnswer() {
+            clearInterval(timer);
+            let userAnswer = parseInt(document.getElementById("answer").value);
+            if (userAnswer === correctAnswer) {
+                showFeedback("¡Correcto! 🎉", "text-green-500");
+                correct++;
+                successAudio.play();
+            } else {
+                showFeedback("Intenta de nuevo 😢", "text-red-500");
+                incorrect++;
+                failAudio.play();
+            }
+            document.getElementById("correct").textContent = correct;
+            document.getElementById("incorrect").textContent = incorrect;
+            document.getElementById("answer").value = "";
+            setTimeout(generateQuestion, 1000);
+        }
+
+        function showFeedback(message, className) {
+            let feedback = document.getElementById("feedback");
+            feedback.textContent = message;
+            feedback.className = `text-lg font-semibold mt-2 fade-in ${className}`;
+        }
+
+        function restartGame() {
+            correct = 0;
+            incorrect = 0;
+            document.getElementById("correct").textContent = correct;
+            document.getElementById("incorrect").textContent = incorrect;
+            generateQuestion();
+        }
+
+        generateQuestion();
+    </script>
+</body>
+</html>
